@@ -1,51 +1,178 @@
-#include <QString>
-#include <QRegularExpression>
-#include <iostream>
+#include "calculate.h"
 
-void Sorting(QString &Str);
 
-void Calculate(QString str)
+void calc(QString);
+void recMethod(QString&, QString);
+double Addition(double, double);
+double Subtraction(double, double);
+double Multiplication(double, double);
+double Division(double, double);
+
+
+calculate::calculate()
 {
-    QString &Str = str;
-    QString *PStr = &Str;
-    QRegularExpression rg(" |[А-я]");
-    QRegularExpression rgCom(",");
-    Str.remove(rg);//отчистка строки от пробелов и латиницы
-    Str.replace(rgCom, ".");//замена запятых на точки
-    std::cout << str.toStdString() << std::endl;
-    Sorting(Str);
-    //prioritization(*Str);
-
 
 }
-void Sorting(QString &Str)
+
+void calc(QString EnterStr)
 {
+    static QRegularExpression rg(" |[А-я]");
+    static QRegularExpression rg_Com(",");
+    EnterStr.remove(rg);//отчистка строки от пробелов и латиницы
+    EnterStr.replace(rg_Com, ".");//замена запятых на точки
 
-    std::cout << Str.toStdString() << std::endl;
-    int FirstPos = 0;
-    int SeondPos = 0;
-    QRegularExpression regex_numbers("\\d");
-    QRegularExpression regex_sign("+-\\*\\");
-    for(int i = 0; i < Str.length(); i++)
+    recMethod(EnterStr, EnterStr);
+}
+
+void recMethod(QString& EnterStr, QString ActiveStr)
+{
+    QRegularExpression Bracket_Group("\\(((\\d\\.?\\d*)([\\+?\\-?\\\?\\*?])(\\d\\.?\\d*))\\)");//скобоки со знакомдействия
+    QRegularExpression INBracket_Group("((\\d\\.?\\d*)([\\+?\\-?])(\\d\\.?\\d*))");//выражение со знаком действия
+    QRegularExpression MultiplicationAndDivision("((\\d\\.?\\d*)([/?\\*?])(\\d\\.?\\d*))");
+
+    QRegularExpressionMatch MMultiplicationAndDivision = MultiplicationAndDivision.match((ActiveStr));//умножение и деление
+    QRegularExpressionMatch MBracket_Group = Bracket_Group.match(ActiveStr);//наличие скобок в выражении
+    QRegularExpressionMatch MINBracket_Group = INBracket_Group.match(ActiveStr);//выражение в скобках
+
+    if(MBracket_Group.hasMatch())//проверяем выражение на скобки
     {
-        QRegularExpressionMatch match = regex_numbers.match(Str[i]);
-       if(match.hasMatch())
-       {
-           SeondPos++;
-           std::cout << "SecondPos: " << SeondPos << std::endl;
-       }
-       else
-       {
+        recMethod(EnterStr, MBracket_Group.captured(1));
+    }
+    else if(MMultiplicationAndDivision.hasMatch())
+    {
+        QString Action = MMultiplicationAndDivision.captured(3);//указываем действие
+        QString PatternSymbolsReplaceRG;
+        QRegularExpression SymbolsReplace;
 
-       }
+        if(Action == "*")
+        {
+            QString a = MINBracket_Group.captured(2);
+            QString b = MINBracket_Group.captured(4);
 
+            double Result = Multiplication(a.toDouble(), b.toDouble());
+
+            PatternSymbolsReplaceRG = MINBracket_Group.captured(2) + "\\*" + MINBracket_Group.captured(4);
+            SymbolsReplace.setPattern(PatternSymbolsReplaceRG);
+            EnterStr.replace(SymbolsReplace, QString::number(Result));
+            QRegularExpression re("\\(\\d*\\)");
+            EnterStr.replace(re, QString::number(Result));
+            ActiveStr = EnterStr;
+
+            std::cout << EnterStr.toStdString() << std::endl;
+        }
+        else if(Action == "/")
+        {
+            QString a = MINBracket_Group.captured(2);
+            QString b = MINBracket_Group.captured(4);
+
+            double Result = Division(a.toDouble(), b.toDouble());
+
+            PatternSymbolsReplaceRG = MINBracket_Group.captured(2) + "/" + MINBracket_Group.captured(4);
+            SymbolsReplace.setPattern(PatternSymbolsReplaceRG);
+            EnterStr.replace(SymbolsReplace, QString::number(Result));
+            QRegularExpression re("\\(\\d*\\)");
+            EnterStr.replace(re, QString::number(Result));
+            ActiveStr = EnterStr;
+
+            std::cout << EnterStr.toStdString() << std::endl;
+        }
+
+        if(MINBracket_Group.hasMatch())
+        {
+            recMethod(EnterStr, ActiveStr);
+        }
+    }
+    else if(MINBracket_Group.hasMatch())//выделяем выражение без скобок
+    {
+        QString Action = MINBracket_Group.captured(3);//указываем действие
+        QString PatternSymbolsReplaceRG;
+        QRegularExpression SymbolsReplace;
+
+        if(Action == "+")
+        {
+            QString a = MINBracket_Group.captured(2);
+            QString b = MINBracket_Group.captured(4);
+
+            double Result = Addition(a.toDouble(), b.toDouble());
+
+            PatternSymbolsReplaceRG = MINBracket_Group.captured(2) + "\\+" + MINBracket_Group.captured(4);
+            SymbolsReplace.setPattern(PatternSymbolsReplaceRG);
+            EnterStr.replace(SymbolsReplace, QString::number(Result));
+            QRegularExpression re("\\(\\d*\\)");
+            EnterStr.replace(re, QString::number(Result));
+            ActiveStr = EnterStr;
+
+            std::cout << EnterStr.toStdString() << std::endl;
+        }
+        else if(Action == "-")
+        {
+            QString a = MINBracket_Group.captured(2);
+            QString b = MINBracket_Group.captured(4);
+
+            double Result = Subtraction(a.toDouble(), b.toDouble());
+
+            PatternSymbolsReplaceRG = MINBracket_Group.captured(2) + "-" + MINBracket_Group.captured(4);
+            SymbolsReplace.setPattern(PatternSymbolsReplaceRG);
+            EnterStr.replace(SymbolsReplace, QString::number(Result));
+            QRegularExpression re("\\(\\d*\\)");
+            EnterStr.replace(re, QString::number(Result));
+            ActiveStr = EnterStr;
+
+            std::cout << EnterStr.toStdString() << std::endl;
+        }
+        else if(Action == "*")
+        {
+            QString a = MINBracket_Group.captured(2);
+            QString b = MINBracket_Group.captured(4);
+
+            double Result = Multiplication(a.toDouble(), b.toDouble());
+
+            PatternSymbolsReplaceRG = MINBracket_Group.captured(2) + "\\*" + MINBracket_Group.captured(4);
+            SymbolsReplace.setPattern(PatternSymbolsReplaceRG);
+            EnterStr.replace(SymbolsReplace, QString::number(Result));
+            QRegularExpression re("\\(\\d*\\)");
+            EnterStr.replace(re, QString::number(Result));
+            ActiveStr = EnterStr;
+
+            std::cout << EnterStr.toStdString() << std::endl;
+        }
+        else if(Action == "/")
+        {
+            QString a = MINBracket_Group.captured(2);
+            QString b = MINBracket_Group.captured(4);
+
+            double Result = Division(a.toDouble(), b.toDouble());
+
+            PatternSymbolsReplaceRG = MINBracket_Group.captured(2) + "/" + MINBracket_Group.captured(4);
+            SymbolsReplace.setPattern(PatternSymbolsReplaceRG);
+            EnterStr.replace(SymbolsReplace, QString::number(Result));
+            QRegularExpression re("\\(\\d*\\)");
+            EnterStr.replace(re, QString::number(Result));
+            ActiveStr = EnterStr;
+
+            std::cout << EnterStr.toStdString() << std::endl;
+        }
+        if(MINBracket_Group.hasMatch())
+        {
+            recMethod(EnterStr, ActiveStr);
+        }
     }
 
-
 }
 
-void Prioritization(QString &Str)
+double Addition(double a, double b)
 {
-    //vector <string> expression;
-
+    return a+b;
+}
+double Subtraction(double a, double b)
+{
+    return a-b;
+}
+double Multiplication(double a, double b)
+{
+    return a*b;
+}
+double Division(double a, double b)
+{
+    return a/b;
 }

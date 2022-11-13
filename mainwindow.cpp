@@ -32,7 +32,6 @@ bool MainWindow::eventFilter(QObject *watched, QEvent *event)
         {
             QString qwe = ui->lineEdit->text();
             calc(qwe);
-            ui->lineEdit->setText();
         }
     }
     QObject::eventFilter(watched, event);

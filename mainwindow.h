@@ -1,7 +1,7 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
-#include <calculate.h>
+#include "calculate.h"
 
 #include <QMainWindow>
 #include <iostream>
@@ -15,6 +15,7 @@ class MainWindow : public QMainWindow
     Q_OBJECT
 
 public:
+    void SetAnswer(QString);
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
@@ -62,6 +63,7 @@ protected:
     bool eventFilter(QObject *watched, QEvent *event);
 
 private:
+    QString answer;
     Ui::MainWindow *ui;
 
 };

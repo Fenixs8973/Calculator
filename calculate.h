@@ -1,6 +1,7 @@
 #ifndef CALCULATE_H
 #define CALCULATE_H
 
+
 #include <QString>
 #include <string>
 #include <QRegularExpression>

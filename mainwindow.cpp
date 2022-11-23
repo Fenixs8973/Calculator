@@ -19,8 +19,19 @@ MainWindow::~MainWindow()
 {
     delete ui;
 }
-void calc(QString EnterStr);
+void calc(QString);
+QString answer;
+void SetAnswer(QString a)
+{
+    QString *an = &answer;
+    *an = a;
+    //std::cout << answer.toStdString() << std::endl;
+}
 
+QString GetAnswer()
+{
+    return answer;
+}
 bool MainWindow::eventFilter(QObject *watched, QEvent *event)
 {
     if(event->type() == QEvent::KeyPress)
@@ -32,12 +43,11 @@ bool MainWindow::eventFilter(QObject *watched, QEvent *event)
         {
             QString qwe = ui->lineEdit->text();
             calc(qwe);
+            ui->lineEdit->setText(GetAnswer());
         }
     }
     QObject::eventFilter(watched, event);
 }
-
-
 
 
 
@@ -120,6 +130,7 @@ void MainWindow::on_Button_equal_clicked()
 {
     QString qwe = ui->lineEdit->text();
     calc(qwe);
+    ui->lineEdit->setText(GetAnswer());
 }
 
 
@@ -166,7 +177,7 @@ void MainWindow::on_Button_Minus_clicked()
 void MainWindow::on_Button_Plus_clicked()
 {
     QString *num = new QString;
-    *num = "=";
+    *num = "+";
     ui->lineEdit->insert(*num);
 }
 
@@ -174,50 +185,6 @@ void MainWindow::on_Button_Plus_clicked()
 void MainWindow::on_Button_omma_clicked()
 {
     QString *num = new QString;
-    *num = ",";
+    *num = ".";
     ui->lineEdit->insert(*num);
 }
-
-/*
-#include <QString>
-#include <QRegularExpression>
-#include <iostream>
-
-void Sorting(QString *PStr);
-
-void Calculate(QString str)
-{
-    static QRegularExpression Bracket_Group("\\(((\\d\\.?\\d*)([\\+?\\-?\\\?\\*?])(\\d\\.?\\d*))\\)");//скобоки со знакомдействия
-    static QRegularExpression INBracket_Group("((\\d\\.?\\d*)([\\+?\\-?\\\?\\*?])(\\d\\.?\\d*))");//выражение со знаком действия
-    static QRegularExpression Addition("((\\d\\.?\\d*)(\\+)(\\d\\.?\\d*))");//сложеине
-    static QRegularExpression Subtraction("((\\d\\.?\\d*)(\\-)(\\d\\.?\\d*))");//вычитание
-    static QRegularExpression Multiplication("((\\d\\.?\\d*)(\\*)(\\d\\.?\\d*))");//умножение
-    static QRegularExpression Division("((\\d\\.?\\d*)(\\)(\\d\\.?\\d*))");//деление
-
-    QString &Str = str;
-    QString *PStr = &Str;
-    static QRegularExpression rg(" |[А-я]");
-    static QRegularExpression rg_Com(",");
-    Str.remove(rg);//отчистка строки от пробелов и латиницы
-    Str.replace(rg_Com, ".");//замена запятых на точки
-    //std::cout << str.toStdString() << std::endl;
-    Sorting(PStr);
-    //std::cout << str.toStdString() << std::endl;
-    //prioritization(*Str);
-
-
-}
-
-
-
-
-//    QRegularExpressionMatch MAddition = Addition.match(Str);
-//    QString qwe = MAddition.captured(3);
-//    std::cout << qwe.toStdString() << std::endl;
-
-void Prioritization(QString &Str)
-{
-    //vector <string> expression;
-
-}
-*/

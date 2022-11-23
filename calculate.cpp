@@ -1,6 +1,5 @@
 #include "calculate.h"
 
-
 void calc(QString);
 void recMethod(QString&, QString);
 double Addition(double, double);
@@ -8,6 +7,7 @@ double Subtraction(double, double);
 double Multiplication(double, double);
 double Division(double, double);
 
+void SetAnswer (QString);
 
 calculate::calculate()
 {
@@ -50,34 +50,34 @@ void recMethod(QString& EnterStr, QString ActiveStr)
         QString b = MMultiplicationAndDivision.captured(4);
 
 
-
         if(Action == "*")
         {
             Result = Multiplication(a.toDouble(), b.toDouble());
 
             PatternSymbolsReplaceRG = MMultiplicationAndDivision.captured(2) + "\\*" + MMultiplicationAndDivision.captured(4);
-
-            std::cout << EnterStr.toStdString() << std::endl;
         }
         else if(Action == "/")
         {
+            if(b.toInt() == 0)
+                return;
+
             Result = Division(a.toDouble(), b.toDouble());
 
             PatternSymbolsReplaceRG = MMultiplicationAndDivision.captured(2) + "/" + MMultiplicationAndDivision.captured(4);
-
-            std::cout << EnterStr.toStdString() << std::endl;
         }
 
         SymbolsReplace.setPattern(PatternSymbolsReplaceRG);
         EnterStr.replace(SymbolsReplace, QString::number(Result));
-        QRegularExpression re("\\(\\d*\\)");
+        QRegularExpression re("\\(\\d*.?\\d*\\)");
         EnterStr.replace(re, QString::number(Result));
         ActiveStr = EnterStr;
+        //std::cout << EnterStr.toStdString() << std::endl;
 
         if(MMultiplicationAndDivision.hasMatch())
         {
             recMethod(EnterStr, ActiveStr);
         }
+
     }
     else if(MINBracket_Group.hasMatch())//выделяем выражение без скобок
     {
@@ -93,31 +93,27 @@ void recMethod(QString& EnterStr, QString ActiveStr)
             Result = Addition(a.toDouble(), b.toDouble());
 
             PatternSymbolsReplaceRG = MINBracket_Group.captured(2) + "\\+" + MINBracket_Group.captured(4);
-
-            std::cout << EnterStr.toStdString() << std::endl;
         }
         else if(Action == "-")
         {
             Result = Subtraction(a.toDouble(), b.toDouble());
 
             PatternSymbolsReplaceRG = MINBracket_Group.captured(2) + "-" + MINBracket_Group.captured(4);
-
-            std::cout << EnterStr.toStdString() << std::endl;
         }
 
         SymbolsReplace.setPattern(PatternSymbolsReplaceRG);
         EnterStr.replace(SymbolsReplace, QString::number(Result));
-        QRegularExpression re("\\(\\d*\\)");
+        QRegularExpression re("\\(\\d*.?\\d*\\)");
         EnterStr.replace(re, QString::number(Result));
         ActiveStr = EnterStr;
-        std::cout << EnterStr.toStdString() << std::endl;
+        //std::cout << EnterStr.toStdString() << std::endl;
 
         if(MINBracket_Group.hasMatch())
         {
             recMethod(EnterStr, ActiveStr);
         }
     }
-
+    SetAnswer(EnterStr);
 }
 
 double Addition(double a, double b)

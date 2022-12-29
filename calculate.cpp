@@ -2,10 +2,12 @@
 
 void calc(QString);
 void recMethod(QString&, QString);
-double Addition(double, double, QString& Action);
-double Subtraction(double, double, QString& Action);
-double Multiplication(double, double, QString& Action);
-double Division(double, double, QString& Action);
+double VariableAction(double, double, QString&);
+double FuncNumberPrecentOfNumber(double, double, QString&);
+double Addition(double, double, QString&);
+double Subtraction(double, double, QString&);
+double Multiplication(double, double, QString&);
+double Division(double, double, QString&);
 
 void Answer(QString, QString&, QString&, double);
 void SetAnswer (QString);
@@ -28,12 +30,16 @@ void calc(QString EnterStr)
 void recMethod(QString& EnterStr, QString ActiveStr)
 {
     QRegularExpression Bracket_Group("\\(((\\d\\.?\\d*)([\\+?\\-?\\\?\\*?])(\\d\\.?\\d*))\\)");//скобоки со знакомдействия
-    QRegularExpression INBracket_Group("((\\d\\.?\\d*)([\\+?\\-?])(\\d\\.?\\d*))");//выражение со знаком действия
-    QRegularExpression MultiplicationAndDivision("((\\d\\.?\\d*)([/?\\*?])(\\d\\.?\\d*))");
+    QRegularExpression NumberPrecentOfNumber("((\\d*\\.?\\d*)([\\/?\\*?\\+?\\-?])(\\d*\\.?\\d*))%");//число действие процент от чилса
+    QRegularExpression PrecentOfNumber("(\\d*\\.?\\d*)%");//процент от числа
+    QRegularExpression MultiplicationAndDivision("((\\d\\.?\\d*)([/?\\*?])(\\d\\.?\\d*))");//деление умножение
+    QRegularExpression AdditionSubtraction("((\\d\\.?\\d*)([\\+?\\-?])(\\d\\.?\\d*))");//сложение вычитанеие
 
-    QRegularExpressionMatch MMultiplicationAndDivision = MultiplicationAndDivision.match((ActiveStr));//умножение и деление
     QRegularExpressionMatch MBracket_Group = Bracket_Group.match(ActiveStr);//наличие скобок в выражении
-    QRegularExpressionMatch MINBracket_Group = INBracket_Group.match(ActiveStr);//выражение в скобках
+    QRegularExpressionMatch MNumberPrecentOfNumber = NumberPrecentOfNumber.match(ActiveStr);//число действие процент от чилса
+    QRegularExpressionMatch MPrecentOfNumber = PrecentOfNumber.match(ActiveStr);//процент от числа
+    QRegularExpressionMatch MMultiplicationAndDivision = MultiplicationAndDivision.match((ActiveStr));//деление умножение
+    QRegularExpressionMatch MAdditionSubtraction = AdditionSubtraction.match(ActiveStr);//сложение вычитанеие
 
     QString PatternSymbolsReplaceRG;//паттерн для регулярного выражения
     QRegularExpression SymbolsReplace;//регулярка, которая использует паттерн PatternSymbolsReplaceRG
@@ -43,6 +49,27 @@ void recMethod(QString& EnterStr, QString ActiveStr)
     if(MBracket_Group.hasMatch())//проверяем выражение на скобки
     {
         recMethod(EnterStr, MBracket_Group.captured(1));
+    }
+    else if(MNumberPrecentOfNumber.hasMatch())//число действие процент от числа
+    {
+        QString Action = MNumberPrecentOfNumber.captured(3);
+
+        QString a = MNumberPrecentOfNumber.captured(2);//первое число
+        QString b = MNumberPrecentOfNumber.captured(4);//второе число
+
+        Result = FuncNumberPrecentOfNumber(a.toDouble(), b.toDouble(), Action);
+
+        PatternSymbolsReplaceRG = MNumberPrecentOfNumber.captured(2) + Action + MNumberPrecentOfNumber.captured(4) + "%";
+
+        Answer(PatternSymbolsReplaceRG, EnterStr, ActiveStr, Result);//замена выражения на ответ
+    }
+    else if(MPrecentOfNumber.hasMatch())
+    {
+        Result = MPrecentOfNumber.captured(1).toDouble() * 0.01;
+
+        PatternSymbolsReplaceRG = MPrecentOfNumber.captured(1) + "%";
+
+        Answer(PatternSymbolsReplaceRG, EnterStr, ActiveStr, Result);
     }
     else if(MMultiplicationAndDivision.hasMatch())
     {
@@ -75,30 +102,30 @@ void recMethod(QString& EnterStr, QString ActiveStr)
             recMethod(EnterStr, ActiveStr);
         }
     }
-    else if(MINBracket_Group.hasMatch())//выделяем выражение без скобок
+    else if(MAdditionSubtraction.hasMatch())//сложение вычитание
     {
-        QString Action = MINBracket_Group.captured(3);//указываем действие
+        QString Action = MAdditionSubtraction.captured(3);//указываем действие
 
-        QString a = MINBracket_Group.captured(2);//первое число
-        QString b = MINBracket_Group.captured(4);//второе число
+        QString a = MAdditionSubtraction.captured(2);//первое число
+        QString b = MAdditionSubtraction.captured(4);//второе число
 
         if(Action == "+")
         {
             Result = Addition(a.toDouble(), b.toDouble(), Action);
 
-            PatternSymbolsReplaceRG = MINBracket_Group.captured(2) + Action + MINBracket_Group.captured(4);
+            PatternSymbolsReplaceRG = MAdditionSubtraction.captured(2) + Action + MAdditionSubtraction.captured(4);
         }
         else if(Action == "-")
         {
             Result = Subtraction(a.toDouble(), b.toDouble(), Action);
 
-            PatternSymbolsReplaceRG = MINBracket_Group.captured(2) + Action + MINBracket_Group.captured(4);
+            PatternSymbolsReplaceRG = MAdditionSubtraction.captured(2) + Action + MAdditionSubtraction.captured(4);
         }
 
         Answer(PatternSymbolsReplaceRG, EnterStr, ActiveStr, Result);//замена выражения на ответ
         //std::cout << EnterStr.toStdString() << std::endl;
 
-        if(MINBracket_Group.hasMatch())
+        if(MAdditionSubtraction.hasMatch())
         {
             recMethod(EnterStr, ActiveStr);
         }
@@ -116,9 +143,36 @@ void Answer(QString PatternSymbolsReplaceRG, QString& EnterStr, QString& ActiveS
     ActiveStr = EnterStr;
 }
 
+double VariableAction(double a, double b, QString& Action)
+{
+    if(Action == "+")
+    {
+        return Addition(a, b, Action);
+    }
+    else if(Action == "-")
+    {
+        return Subtraction(a, b, Action);
+    }
+    else if(Action == "*")
+    {
+        return Multiplication(a, b, Action);
+    }
+    else if(Action == "/")
+    {
+        return Division(a, b, Action);
+    }
+}
+
+double FuncNumberPrecentOfNumber(double a, double b, QString& Action)
+{
+    double OnePrecent = a*0.01;
+    double VariablePrecent = OnePrecent* b;
+
+    return VariableAction(a, VariablePrecent, Action);
+}
 double Addition(double a, double b, QString& Action)
 {
-    Action = "\\+";
+    Action = "\\+";//меняем для паттерна регулярки
     return a+b;
 }
 double Subtraction(double a, double b, QString& Action)

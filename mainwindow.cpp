@@ -188,3 +188,19 @@ void MainWindow::on_Button_omma_clicked()
     *num = ".";
     ui->lineEdit->insert(*num);
 }
+
+void MainWindow::on_Button_Mod_clicked()
+{
+    QString *num = new QString;
+    *num = "mod";
+    ui->lineEdit->insert(*num);
+}
+
+
+void MainWindow::on_Button_Percent_clicked()
+{
+    QString *num = new QString;
+    *num = "%";
+    ui->lineEdit->insert(*num);
+}
+

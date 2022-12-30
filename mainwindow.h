@@ -59,6 +59,10 @@ private slots:
 
     void on_Button_omma_clicked();
 
+    void on_Button_Mod_clicked();
+
+    void on_Button_Percent_clicked();
+
 protected:
     bool eventFilter(QObject *watched, QEvent *event);
 

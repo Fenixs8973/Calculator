@@ -30,15 +30,17 @@ void calc(QString EnterStr)
 void recMethod(QString& EnterStr, QString ActiveStr)
 {
     QRegularExpression Bracket_Group("\\(((\\d\\.?\\d*)([\\+?\\-?\\\?\\*?])(\\d\\.?\\d*))\\)");//скобоки со знакомдействия
+    QRegularExpression NumberMODNubmer("(\\d*\\.?\\d*)mod(\\d*\\.?\\d*)");
     QRegularExpression NumberPrecentOfNumber("((\\d*\\.?\\d*)([\\/?\\*?\\+?\\-?])(\\d*\\.?\\d*))%");//число действие процент от чилса
     QRegularExpression PrecentOfNumber("(\\d*\\.?\\d*)%");//процент от числа
-    QRegularExpression MultiplicationAndDivision("((\\d\\.?\\d*)([/?\\*?])(\\d\\.?\\d*))");//деление умножение
+    QRegularExpression MultiplicationDivision("((\\d\\.?\\d*)([/?\\*?])(\\d\\.?\\d*))");//деление умножение
     QRegularExpression AdditionSubtraction("((\\d\\.?\\d*)([\\+?\\-?])(\\d\\.?\\d*))");//сложение вычитанеие
 
     QRegularExpressionMatch MBracket_Group = Bracket_Group.match(ActiveStr);//наличие скобок в выражении
+    QRegularExpressionMatch MNumberMODNubmer = NumberMODNubmer.match(ActiveStr);
     QRegularExpressionMatch MNumberPrecentOfNumber = NumberPrecentOfNumber.match(ActiveStr);//число действие процент от чилса
     QRegularExpressionMatch MPrecentOfNumber = PrecentOfNumber.match(ActiveStr);//процент от числа
-    QRegularExpressionMatch MMultiplicationAndDivision = MultiplicationAndDivision.match((ActiveStr));//деление умножение
+    QRegularExpressionMatch MMultiplicationDivision = MultiplicationDivision.match((ActiveStr));//деление умножение
     QRegularExpressionMatch MAdditionSubtraction = AdditionSubtraction.match(ActiveStr);//сложение вычитанеие
 
     QString PatternSymbolsReplaceRG;//паттерн для регулярного выражения
@@ -49,6 +51,17 @@ void recMethod(QString& EnterStr, QString ActiveStr)
     if(MBracket_Group.hasMatch())//проверяем выражение на скобки
     {
         recMethod(EnterStr, MBracket_Group.captured(1));
+    }
+    else if(MNumberMODNubmer.hasMatch())
+    {
+        int a = MNumberMODNubmer.captured(1).toInt();
+        int b = MNumberMODNubmer.captured(2).toInt();
+
+        Result = a % b;
+
+        PatternSymbolsReplaceRG = MNumberMODNubmer.captured(1) + "mod" + MNumberMODNubmer.captured(2);
+
+        Answer(PatternSymbolsReplaceRG, EnterStr, ActiveStr, Result);//замена выражения на ответ
     }
     else if(MNumberPrecentOfNumber.hasMatch())//число действие процент от числа
     {
@@ -71,18 +84,18 @@ void recMethod(QString& EnterStr, QString ActiveStr)
 
         Answer(PatternSymbolsReplaceRG, EnterStr, ActiveStr, Result);
     }
-    else if(MMultiplicationAndDivision.hasMatch())
+    else if(MMultiplicationDivision.hasMatch())
     {
-        QString Action = MMultiplicationAndDivision.captured(3);//указываем действие
+        QString Action = MMultiplicationDivision.captured(3);//указываем действие
 
-        QString a = MMultiplicationAndDivision.captured(2);//первое число
-        QString b = MMultiplicationAndDivision.captured(4);//второе число
+        QString a = MMultiplicationDivision.captured(2);//первое число
+        QString b = MMultiplicationDivision.captured(4);//второе число
 
         if(Action == "*")
         {
             Result = Multiplication(a.toDouble(), b.toDouble(), Action);
 
-            PatternSymbolsReplaceRG = MMultiplicationAndDivision.captured(2) + Action + MMultiplicationAndDivision.captured(4);
+            PatternSymbolsReplaceRG = MMultiplicationDivision.captured(2) + Action + MMultiplicationDivision.captured(4);
         }
         else if(Action == "/")
         {
@@ -91,13 +104,13 @@ void recMethod(QString& EnterStr, QString ActiveStr)
 
             Result = Division(a.toDouble(), b.toDouble(), Action);
 
-            PatternSymbolsReplaceRG = MMultiplicationAndDivision.captured(2) + Action + MMultiplicationAndDivision.captured(4);
+            PatternSymbolsReplaceRG = MMultiplicationDivision.captured(2) + Action + MMultiplicationDivision.captured(4);
         }
 
         Answer(PatternSymbolsReplaceRG, EnterStr, ActiveStr, Result);
         //std::cout << EnterStr.toStdString() << std::endl;
 
-        if(MMultiplicationAndDivision.hasMatch())
+        if(MMultiplicationDivision.hasMatch())
         {
             recMethod(EnterStr, ActiveStr);
         }

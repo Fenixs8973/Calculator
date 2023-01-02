@@ -1,20 +1,66 @@
 #include "calculate.h"
+#include <cassert>
+
+#define UnitTest
 
 void calc(QString);
 void recMethod(QString&, QString);
-double VariableAction(double, double, QString&);
-double FuncNumberPrecentOfNumber(double, double, QString&);
-double Addition(double, double, QString&);
-double Subtraction(double, double, QString&);
-double Multiplication(double, double, QString&);
-double Division(double, double, QString&);
+double VariableAction(double, double);
+double FuncNumberPrecentOfNumber(double, double);
+double Addition(double, double);
+double Subtraction(double, double);
+double Multiplication(double, double);
+double Division(double, double);
 
 void Answer(QString, QString&, QString&, double);
 void SetAnswer (QString);
 
+
+#ifdef UnitTest
+void TestAddition()
+{
+    assert(Addition(5, 5) == 10);
+    assert(Addition(5, 0) == 5);
+    assert(Addition(5, -5) == 0);
+    assert(Addition(5, -10) == -5);
+    std::cout <<  "Addition\t" << "\t" << "OK" << std::endl;
+}
+void TestSubtraction()
+{
+    assert(Subtraction(5, 5) == 0);
+    assert(Subtraction(5,0) == 5);
+    assert(Subtraction(5, -5) == 10);
+    assert(Subtraction(5, 10) == -5);
+    std::cout << "Subtraction\t" << "\t" << "OK" << std::endl;
+}
+void TestMultiplication()
+{
+    assert(Multiplication(5,5) == 25);
+    assert(Multiplication(5, 0) == 0);
+    assert(Multiplication(5, -5) == -25);
+    assert(Multiplication(-5, -5) == 25);
+    std::cout << "Multiplication" << "\t" << "OK" << std::endl;
+}
+void TestDivision()
+{
+    assert(Division(5, 5) == 1);
+    //assert(Division(5, 0) == 0);
+    assert(Division(5, -5) == -1);
+    assert(Division(-5, -5) == 1);
+    std::cout << "Division\t" << "\t" << "OK" << std::endl;
+}
+#endif //UnitTest
+
+calculate C;
+
 calculate::calculate()
 {
-
+#ifdef UnitTest
+    TestAddition();
+    TestSubtraction();
+    TestMultiplication();
+    TestDivision();
+#endif
 }
 
 void calc(QString EnterStr)
@@ -29,12 +75,12 @@ void calc(QString EnterStr)
 
 void recMethod(QString& EnterStr, QString ActiveStr)
 {
-    QRegularExpression Bracket_Group("\\(((\\d\\.?\\d*)([\\+?\\-?\\\?\\*?])(\\d\\.?\\d*))\\)");//скобоки со знакомдействия
-    QRegularExpression NumberMODNubmer("(\\d*\\.?\\d*)mod(\\d*\\.?\\d*)");
-    QRegularExpression NumberPrecentOfNumber("((\\d*\\.?\\d*)([\\/?\\*?\\+?\\-?])(\\d*\\.?\\d*))%");//число действие процент от чилса
+    QRegularExpression Bracket_Group("\\(((\\d+\\.?\\d*)([\\+?\\-?\\\?\\*?])(\\d+\\.?\\d*))\\)");//скобоки со знакомдействия
+    QRegularExpression NumberMODNubmer("(\\d+)mod(\\d+)");//остаток от деления
+    QRegularExpression NumberPrecentOfNumber("((\\d+\\.?\\d*)([\\/?\\*?\\+?\\-?])(\\d+\\.?\\d*))%");//число действие процент от чилса
     QRegularExpression PrecentOfNumber("(\\d*\\.?\\d*)%");//процент от числа
-    QRegularExpression MultiplicationDivision("((\\d\\.?\\d*)([/?\\*?])(\\d\\.?\\d*))");//деление умножение
-    QRegularExpression AdditionSubtraction("((\\d\\.?\\d*)([\\+?\\-?])(\\d\\.?\\d*))");//сложение вычитанеие
+    QRegularExpression MultiplicationDivision("((\\d+\\.?\\d*)([/?\\*?])(\\d+\\.?\\d*))");//деление умножение
+    QRegularExpression AdditionSubtraction("((\\d+\\.?\\d*)([\\+?\\-?])(\\d+\\.?\\d*))");//сложение вычитанеие
 
     QRegularExpressionMatch MBracket_Group = Bracket_Group.match(ActiveStr);//наличие скобок в выражении
     QRegularExpressionMatch MNumberMODNubmer = NumberMODNubmer.match(ActiveStr);
@@ -65,14 +111,15 @@ void recMethod(QString& EnterStr, QString ActiveStr)
     }
     else if(MNumberPrecentOfNumber.hasMatch())//число действие процент от числа
     {
-        QString Action = MNumberPrecentOfNumber.captured(3);
+
+        C.SetAction(MNumberPrecentOfNumber.captured(3));
 
         QString a = MNumberPrecentOfNumber.captured(2);//первое число
         QString b = MNumberPrecentOfNumber.captured(4);//второе число
 
-        Result = FuncNumberPrecentOfNumber(a.toDouble(), b.toDouble(), Action);
+        Result = VariableAction(a.toDouble(), b.toDouble());
 
-        PatternSymbolsReplaceRG = MNumberPrecentOfNumber.captured(2) + Action + MNumberPrecentOfNumber.captured(4) + "%";
+        PatternSymbolsReplaceRG = MNumberPrecentOfNumber.captured(2) + C.GetAction() + MNumberPrecentOfNumber.captured(4) + "%";
 
         Answer(PatternSymbolsReplaceRG, EnterStr, ActiveStr, Result);//замена выражения на ответ
     }
@@ -86,25 +133,26 @@ void recMethod(QString& EnterStr, QString ActiveStr)
     }
     else if(MMultiplicationDivision.hasMatch())
     {
-        QString Action = MMultiplicationDivision.captured(3);//указываем действие
+
+        C.SetAction(MMultiplicationDivision.captured(3));//указываем действие
 
         QString a = MMultiplicationDivision.captured(2);//первое число
         QString b = MMultiplicationDivision.captured(4);//второе число
 
-        if(Action == "*")
+        if(C.GetAction() == "*")
         {
-            Result = Multiplication(a.toDouble(), b.toDouble(), Action);
+            Result = VariableAction(a.toDouble(), b.toDouble());
 
-            PatternSymbolsReplaceRG = MMultiplicationDivision.captured(2) + Action + MMultiplicationDivision.captured(4);
+            PatternSymbolsReplaceRG = MMultiplicationDivision.captured(2) + C.GetAction() + MMultiplicationDivision.captured(4);
         }
-        else if(Action == "/")
+        else if(C.GetAction() == "/")
         {
             if(b.toInt() == 0)
                 return;
 
-            Result = Division(a.toDouble(), b.toDouble(), Action);
+            Result = VariableAction(a.toDouble(), b.toDouble());
 
-            PatternSymbolsReplaceRG = MMultiplicationDivision.captured(2) + Action + MMultiplicationDivision.captured(4);
+            PatternSymbolsReplaceRG = MMultiplicationDivision.captured(2) + C.GetAction() + MMultiplicationDivision.captured(4);
         }
 
         Answer(PatternSymbolsReplaceRG, EnterStr, ActiveStr, Result);
@@ -117,22 +165,23 @@ void recMethod(QString& EnterStr, QString ActiveStr)
     }
     else if(MAdditionSubtraction.hasMatch())//сложение вычитание
     {
-        QString Action = MAdditionSubtraction.captured(3);//указываем действие
+
+        C.SetAction(MAdditionSubtraction.captured(3));//указываем действие
 
         QString a = MAdditionSubtraction.captured(2);//первое число
         QString b = MAdditionSubtraction.captured(4);//второе число
 
-        if(Action == "+")
+        if(C.GetAction() == "+")
         {
-            Result = Addition(a.toDouble(), b.toDouble(), Action);
+            Result = VariableAction(a.toDouble(), b.toDouble());
 
-            PatternSymbolsReplaceRG = MAdditionSubtraction.captured(2) + Action + MAdditionSubtraction.captured(4);
+            PatternSymbolsReplaceRG = MAdditionSubtraction.captured(2) + C.GetAction() + MAdditionSubtraction.captured(4);
         }
-        else if(Action == "-")
+        else if(C.GetAction() == "-")
         {
-            Result = Subtraction(a.toDouble(), b.toDouble(), Action);
+            Result = VariableAction(a.toDouble(), b.toDouble());
 
-            PatternSymbolsReplaceRG = MAdditionSubtraction.captured(2) + Action + MAdditionSubtraction.captured(4);
+            PatternSymbolsReplaceRG = MAdditionSubtraction.captured(2) + C.GetAction() + MAdditionSubtraction.captured(4);
         }
 
         Answer(PatternSymbolsReplaceRG, EnterStr, ActiveStr, Result);//замена выражения на ответ
@@ -142,6 +191,10 @@ void recMethod(QString& EnterStr, QString ActiveStr)
         {
             recMethod(EnterStr, ActiveStr);
         }
+    }
+    else
+    {
+        SetAnswer("Не верное выражение");
     }
     SetAnswer(EnterStr);
 }
@@ -156,50 +209,50 @@ void Answer(QString PatternSymbolsReplaceRG, QString& EnterStr, QString& ActiveS
     ActiveStr = EnterStr;
 }
 
-double VariableAction(double a, double b, QString& Action)
+double VariableAction(double a, double b)
 {
-    if(Action == "+")
+    if(C.GetAction() == "+")
     {
-        return Addition(a, b, Action);
+        return Addition(a, b);
     }
-    else if(Action == "-")
+    else if(C.GetAction() == "-")
     {
-        return Subtraction(a, b, Action);
+        return Subtraction(a, b);
     }
-    else if(Action == "*")
+    else if(C.GetAction() == "*")
     {
-        return Multiplication(a, b, Action);
+        return Multiplication(a, b);
     }
-    else if(Action == "/")
+    else if(C.GetAction() == "/")
     {
-        return Division(a, b, Action);
+        return Division(a, b);
     }
 }
 
-double FuncNumberPrecentOfNumber(double a, double b, QString& Action)
+double FuncNumberPrecentOfNumber(double a, double b)
 {
     double OnePrecent = a*0.01;
     double VariablePrecent = OnePrecent* b;
 
-    return VariableAction(a, VariablePrecent, Action);
+    return VariableAction(a, VariablePrecent);
 }
-double Addition(double a, double b, QString& Action)
+double Addition(double a, double b)
 {
-    Action = "\\+";//меняем для паттерна регулярки
+    C.SetAction("\\+");//меняем для паттерна регулярки
     return a+b;
 }
-double Subtraction(double a, double b, QString& Action)
+double Subtraction(double a, double b)
 {
-    Action = "-";
+    C.SetAction("-");
     return a-b;
 }
-double Multiplication(double a, double b, QString& Action)
+double Multiplication(double a, double b)
 {
-    Action = "\\*";
+    C.SetAction("\\*");
     return a*b;
 }
-double Division(double a, double b, QString& Action)
+double Division(double a, double b)
 {
-    Action = "/";
+    C.SetAction("/");
     return a/b;
 }

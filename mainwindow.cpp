@@ -23,8 +23,7 @@ void calc(QString);
 QString answer;
 void SetAnswer(QString a)
 {
-    QString *an = &answer;
-    *an = a;
+    answer = a;
     //std::cout << answer.toStdString() << std::endl;
 }
 

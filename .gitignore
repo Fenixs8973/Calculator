@@ -1,3 +1,6 @@
 
 *.e54bd10
 *.user
+*.json
+build
+.vscode

@@ -46,6 +46,7 @@ bool MainWindow::eventFilter(QObject *watched, QEvent *event)
         }
     }
     QObject::eventFilter(watched, event);
+    return false;
 }
 
 
@@ -200,6 +201,14 @@ void MainWindow::on_Button_Percent_clicked()
 {
     QString *num = new QString;
     *num = "%";
+    ui->lineEdit->insert(*num);
+}
+
+
+void MainWindow::on_Button_Exp_clicked()
+{
+    QString *num = new QString;
+    *num = "**";
     ui->lineEdit->insert(*num);
 }
 

@@ -2,20 +2,23 @@
 #define CALCULATE_H
 
 
-#include <QString>
+#include <qstring.h>
 #include <string>
 #include <QRegularExpression>
 #include <iostream>
 #include <QRegularExpressionMatch>
 #include <iomanip>
+#include <cmath>
+
+#include <stdlib.h>
 
 
 class calculate
 {
 public:
-    void SetAction(QString a)
+    void SetAction(QString a)//назначить действие переменной
     {
-        if(a == "+" || a == "-" || a == "*" || a == "/" || "\\+" || "\\*")
+        if(a == "+" || a == "-" || a == "*" || a == "/" || a == "%" || "\\+" || "\\*" || "\\*\\*")
         {
             Action = a;
         }
@@ -24,7 +27,7 @@ public:
             Action = "+";
         }
     }
-    QString GetAction()
+    QString GetAction()//получить действие из переменной
     {
         return Action;
     }

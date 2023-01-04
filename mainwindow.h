@@ -63,6 +63,8 @@ private slots:
 
     void on_Button_Percent_clicked();
 
+    void on_Button_Exp_clicked();
+
 protected:
     bool eventFilter(QObject *watched, QEvent *event);
 
